@@ -1,0 +1,118 @@
+---
+title: "Homework 3"
+subtitle: "DA 6233"
+author: "Hannah Haley | zpg883"
+date: "26 October 2021"
+output: 
+  html_notebook:
+    theme: cosmo
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(plotly)
+library(highcharter)
+theme_set(theme_minimal())
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Before you begin, note that, in the header, the output format of this document is `html_notebook`. When you save this file, it automatically creates another file with the same file name but with `.nb.html` extension in the same directory. This is the file you will submit as your homework solution along with the `.Rmd` file. 
+
+The objective of this homework is to give you more practice on interactive visualizations using `plotly` and `highcharter`. 
+
+As always recreate these visualizations exactly. Q1 and Q2 use `plotly` while Q3-Q5 use `highcharter`. 
+
+Note: The output width of the `plotly` plots is set to 100% but they still don't fill up the full width of the HTML document. Don't worry about it.
+
+## Q1 (3 points)
+
+Use `mpg` data set from `ggplot2` to create a static visualization and then use `ggplotly()` to create a limited interactive plot.
+
+**Hint**: You will need to supply only `frame`. No `ids` used.
+
+```{r warning=FALSE, fig.width=9}
+data(mpg)
+base1 <- ggplot(mpg, aes(x = cty, y = hwy, color = class)) + geom_point(aes(frame = class))+ theme(legend.position = "none")
+```
+
+```{r}
+ggplotly(base1)
+```
+
+## Q2 (3 points)
+
+For this visualization you will use `plot_ly()` function. There is only one more function in the plot: `layout()`. This function allows you to set the title of the plot as well as axes titles. You will use it only for changing the titles and nothing else.  To create this plot, we will use `economics` data set from `ggplot2`.
+
+**Hint:** [Download Plotly cheatsheet](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf)
+
+
+```{r warning=True, message=FALSE, fig.width=9}
+data("economics")
+
+base2<- economics %>% plot_ly(x= ~ date, y= ~ unemploy, hoverinfo= "date", mode='lines') %>% layout(title="Unemployment peaked after financial crisis", yaxis=list(title= "Unemployment in '000", nticks=10),xaxis=list(title="Date"))
+
+```
+```{r}
+ggplotly(base2)
+```
+
+As an aside, the Y axis in this line graph doesn't start from 0, which is commonly frowned upon. There is usually no hard and fast rule about this but generally if you are just interested in the trend, truncating the Y axis is OK.
+
+
+For the next three questions, you will use [`highcharter`](https://jkunst.com/highcharter/). 
+
+## Q3 (3 points)
+This example creates a heatmap similar to the one [shown here](https://jkunst.com/highcharter/articles/highcharter.html).
+
+Use `mpg` data and `hchart()` function. We want to create a heatmap of average highway mileage for different `class` and `cyl`. This plot removes all the observations with five cylinders or with `2seater` class. Also note that I am treating `cyl` as a character (string) variable. This is essentially to create this plot.
+
+```{r}
+data(mpg)
+d1<-mpg %>% select(class, cyl, hwy) %>% dplyr::filter(cyl !=5, class !='2seater') %>% group_by(class, cyl) %>%  summarize(avghwy=mean(hwy))
+
+hchart(d1, "heatmap", hcaes(x=class, y=as.character(cyl), value=avghwy))
+
+```
+
+## Q4 (3 points)
+
+For this example, use a randomly selected subset of `diamonds` data set from `ggplot2`:
+
+```{r echo=TRUE}
+set.seed(2020)
+d2 <- diamonds[sample(nrow(diamonds), 1000),]
+```
+
+Next use `d1` to create the following plot. 
+
+I have used `hc_theme_flat()` for this plot. **Please use this theme for your plot too!**
+You can add a theme to the plot using `hc_add_theme()` function.
+
+```{r}
+hchart(d2, "point", hcaes(x=carat, y=price, group=clarity)) %>% hc_add_theme(hc_theme_flat()) %>% hc_title(text = "Varations in Diamond Prices", align = "center") %>% hc_xAxis(title = list(text = "Weight of Diamonds in Carats")) %>% hc_yAxis(title = list(text= "Price of Diamonds"))
+
+  
+```
+
+
+## Q5 (3 points)
+
+Recreate the plot in Q2 using `hchart()`. I used `hc_theme_chalk()`. You can use any theme you want. You can check out the themes [here](https://jkunst.com/highcharter/articles/themes.html).
+
+```{r fig.width=9}
+data("economics")
+d3<- hchart(economics, "line", hcaes(x=date,y=unemploy))
+d3 %>% hc_add_theme(hc_theme_chalk()) %>% hc_title(text = "Unemployment peaked after financial crisis", align = "center") %>% hc_xAxis(title = list(text = "Dates")) %>% hc_yAxis(title = list(text= "Unemployment in '000"))
+
+```
+
+## Q6 (0 points)
+
+Between `plotly` and `highcharter`, which package do you like more? 
+
+**Hint:** The correct answer is `highcharter` r emo::ji("smile")
+* I like both equally!!!
